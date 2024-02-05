@@ -92,17 +92,96 @@ def main():
     from datasets import load_dataset
     tokenizer.pad_token = tokenizer.eos_token
     
-    iterable_ds = load_dataset("dichspace/darulm",domains='all',  cache_dir='.', split="train", streaming=True)
-    examples = []
-    examples = [example for example in iterable_ds]
+    from datasets import load_dataset
+    #datasets.load_dataset('dichspace/darulm', domains=["habr","textbook"], split="train", streaming=True):
+        _URLS = [
+        "libru_accounting_0.jsonl.zst",
+        "libru_antique_0.jsonl.zst",
+        "libru_antique_1.jsonl.zst",
+        "libru_aphorisms_0.jsonl.zst",
+        "libru_art_0.jsonl.zst",
+        "libru_biography_0.jsonl.zst",
+        "libru_biography_1.jsonl.zst",
+        "libru_biography_2.jsonl.zst",
+        "libru_biography_3.jsonl.zst",
+        "libru_biography_4.jsonl.zst",
+        "libru_biology_0.jsonl.zst",
+        "libru_business_0.jsonl.zst",
+        "libru_cinema_0.jsonl.zst",
+        "libru_computers_0.jsonl.zst",
+        "libru_design_0.jsonl.zst",
+        "libru_dramaturgy_0.jsonl.zst",
+        "libru_economics_0.jsonl.zst",
+        "libru_essay_0.jsonl.zst",
+        "libru_essay_1.jsonl.zst",
+        "libru_essay_2.jsonl.zst",
+        "libru_fantasy_0.jsonl.zst",
+        "libru_geography_0.jsonl.zst",
+        "libru_guidebooks_0.jsonl.zst",
+        "libru_guidebooks_1.jsonl.zst",
+        "libru_history_0.jsonl.zst",
+        "libru_history_1.jsonl.zst",
+        "libru_history_2.jsonl.zst",
+        "libru_history_3.jsonl.zst",
+        "libru_history_4.jsonl.zst",
+        "libru_history_5.jsonl.zst",
+        "libru_humor_0.jsonl.zst",
+        "libru_language_0.jsonl.zst",
+        "libru_law_0.jsonl.zst",
+        "libru_literature_0.jsonl.zst",
+        "libru_medicine_0.jsonl.zst",
+        "libru_military_0.jsonl.zst",
+        "libru_music_0.jsonl.zst",
+        "libru_philosophy_0.jsonl.zst",
+        "libru_politic_0.jsonl.zst",
+        "libru_prose_0.jsonl.zst",
+        "libru_prose_1.jsonl.zst",
+        "libru_prose_2.jsonl.zst",
+        "libru_psychology_0.jsonl.zst",
+        "libru_psychology_1.jsonl.zst",
+        "libru_reference_0.jsonl.zst",
+        "libru_religion_0.jsonl.zst",
+        "libru_religion_1.jsonl.zst",
+        "libru_religion_2.jsonl.zst",
+        "libru_religion_3.jsonl.zst",
+        "libru_science_0.jsonl.zst",
+        "libru_science_1.jsonl.zst",
+        "libru_science_2.jsonl.zst",
+        "libru_sociology_0.jsonl.zst",
+        "libru_textbook_0.jsonl.zst",
+        "libru_UNDEFINED_0.jsonl.zst",
+        "rulm_buriy_0.jsonl.zst",
+        "rulm_buriy_1.jsonl.zst",
+        "rulm_buriy_2.jsonl.zst",
+        "rulm_gazeta_0.jsonl.zst",
+        "rulm_habr_0.jsonl.zst",
+        "rulm_habr_1.jsonl.zst",
+        "rulm_lenta_0.jsonl.zst",
+        "rulm_ods-tass_0.jsonl.zst",
+        "rulm_ods-tass_1.jsonl.zst",
+        "rulm_pikabu_0.jsonl.zst",
+        "rulm_pikabu_1.jsonl.zst",
+        "rulm_pikabu_2.jsonl.zst",
+        "rulm_taiga-fontanka_0.jsonl.zst",
+        "rulm_wiki_0.jsonl.zst",
+        "rulm_wiki_1.jsonl.zst",
+        "rulm_wiki_2.jsonl.zst",
+        "wiki40_enwiki_0.jsonl.zst",
+    ]
+    DOMAINS = sorted(set(url.split('_')[1] for url in _URLS))
+    dataset = load_dataset("dichspace/darulm",domains=DOMAINS, split="train",  cache_dir='.', streaming=True)
 
-    # Define the features of the dataset based on the iterable dataset's features
-    features = iterable_ds.features
     
-    # Now create a non-streaming Dataset from the list of examples using the features
-    dataset = Dataset.from_dict({
-        feature: [example[feature] for example in examples] for feature in features
-    }, features=features)
+    from torch.utils.data import DataLoader
+    from transformers import PreTrainedTokenizer
+    import torch
+    
+    
+    
+    
+    # Define the features of the dataset based on the iterable dataset's features
+    
+    
     
     # Check the dataset
     print(dataset)
@@ -123,28 +202,35 @@ def main():
     
     from torch.utils.data import Dataset
     
-    from torch.utils.data import Dataset
+ 
     
-    class rulm_Dataset(Dataset):
-        def __init__(self, dataset, tokenizer):
-           
-            
-            self.tokenized_dataset = dataset.map(
-                lambda example: {"tokens": tokenizer.encode(example["text"],padding='max_length', max_length=1024, truncation=True, add_special_tokens=True)},
-                batched=False
-            )
+   
+    import torch
+    from torch.utils.data import Dataset, DataLoader
+    from transformers import PreTrainedTokenizer
     
-        def __len__(self):
-            return len(self.tokenized_dataset['train']) 
+    def custom_collate_fn(batch, tokenizer: PreTrainedTokenizer, max_length=1024):
+        # Extract texts from the dictionaries in the batch
+        texts = [example['text'] for example in batch]
+        # Tokenize all texts
+        tokenized_batch = [tokenizer.encode(text, padding='max_length', max_length=max_length, truncation=True, add_special_tokens=True) for text in texts]
+        tokenized_batch = torch.tensor(tokenized_batch)
+        return tokenized_batch
     
-        def __getitem__(self, item):
-            return self.tokenized_dataset['train'][item]['tokens'] 
+    # Assuming 'dataset' is a list of dictionaries like the one you provided,
+    # and 'tokenizer' is an instance of a PreTrainedTokenizer from the transformers library
+    
+    loader = DataLoader(
+        dataset=dataset,
+        batch_size=1,
+        num_workers=32,
+        collate_fn=lambda batch: custom_collate_fn(batch, tokenizer=tokenizer),
+    )
+
+
     
     
-    
-    
-    
-    concatenated_dataset = rulm_Dataset(dataset, tokenizer)
+    #concatenated_dataset = rulm_Dataset(dataset, tokenizer)
     
     
     import torch
@@ -152,8 +238,8 @@ def main():
     
    
     
-    from torch.utils.data import DataLoader
-    loader = DataLoader(concatenated_dataset, batch_size=1, shuffle=True)
+    #from torch.utils.data import DataLoader
+    #loader = DataLoader(concatenated_dataset, batch_size=1, shuffle=True)
     
    
     #LL_adamw
