@@ -1,4 +1,3 @@
-#from peft import LoraConfig, PeftConfig, PeftModel, get_peft_model, prepare_model_for_int8_training
 import torch
 import torch.nn as nn
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
@@ -67,9 +66,9 @@ def main():
     import torch
     from datasets import Dataset
     #import tensor_parallel as tp
-    tokenizer = AutoTokenizer.from_pretrained("Vikhrmodels/Vikhr-7b-0.1")
+    tokenizer = AutoTokenizer.from_pretrained("tini_ru")
     
-    model = AutoModelForCausalLM.from_pretrained("Vikhrmodels/Vikhr-7b-0.1")
+    model = AutoModelForCausalLM.from_pretrained("tini_ru")
 
     #model.resize_token_embeddings(len(tokenizer))
     # device_map="auto")
@@ -94,7 +93,7 @@ def main():
     
     from datasets import load_dataset
     #datasets.load_dataset('dichspace/darulm', domains=["habr","textbook"], split="train", streaming=True):
-        _URLS = [
+    _URLS = [
         "libru_accounting_0.jsonl.zst",
         "libru_antique_0.jsonl.zst",
         "libru_antique_1.jsonl.zst",
@@ -257,7 +256,8 @@ def main():
     lr = 3e-4 #0.0003
     
     optimizer = AdamW(model.parameters(), lr=lr, eps=1e-5, betas=(0.9, 0.95))
-    total_steps = len(loader)
+    total_steps = 5000000
+    #len(loader)
 
     import wandb
      #wandb.login(key = 'e461a6a3bca9f7cec3390a40dc10cdf576ce3252')
@@ -265,9 +265,9 @@ def main():
     
     
     
-    num_warmup_steps = int(0.05 * len(loader))  # 5% of total steps
+    num_warmup_steps = int(0.05 * total_steps)  # 5% of total steps
     
-    scheduler = get_cosine_schedule_with_warmup(optimizer, num_warmup_steps=num_warmup_steps, num_training_steps=len(loader))
+    scheduler = get_cosine_schedule_with_warmup(optimizer, num_warmup_steps=num_warmup_steps, num_training_steps=total_steps)
     
    
     
@@ -299,7 +299,7 @@ def main():
                 i += 1
                 start_time = time.time()
         
-                input_ids = torch.cat(input_ids, 0)
+                #input_ids = torch.cat(input_ids, 0)
                 outputs = model(input_ids=input_ids.unsqueeze(0), labels=input_ids.unsqueeze(0))
                 loss = outputs.loss
                 loss = loss / gradient_accumulation_steps
@@ -348,4 +348,3 @@ def main():
                         
 if __name__=='__main__':
     main()
-
