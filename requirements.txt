@@ -3,3 +3,5 @@ accelerate
 tqdm
 wandb
 datasets==2.15.0
+zstandard
+jsonlines
