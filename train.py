@@ -62,7 +62,7 @@ def main():
     #import tensor_parallel as tp
     tokenizer = AutoTokenizer.from_pretrained("Vikhrmodels/Vikhr-7b-0.1")
     
-    model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-v0.1")
+    model = AutoModelForCausalLM.from_pretrained("IlyaGusev/saiga_llama3_8b", attn_implementation="flash_attention_2", model_kwargs={"torch_dtype": torch.bfloat16},)
 
     model.resize_token_embeddings(len(tokenizer))
     # device_map="auto")
@@ -147,12 +147,12 @@ def main():
     #scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=lr,total_steps=total_steps,div_factor=25, pct_start=0.2)
     lr = 3e-4 #0.0003
     
-    optimizer = AdamW(model.parameters(), lr=lr, eps=1e-8)
+    optimizer = AdamW(model.parameters(), lr=lr, eps=1e-8, betas=(0.9, 0.999))
     total_steps = len(loader)
 
     import wandb
-     #wandb.login(key = 'e461a6a3bca9f7cec3390a40dc10cdf576ce3252')
-    wandb.init(name=f'tiny_llama_lr_{lr}_cl_freeze_init_128_batch', project='tiny_llama')
+    wandb.login(key = 'e461a6a3bca9f7cec3390a40dc10cdf576ce3252')
+    wandb.init(name=f'llama3_lr_{lr}_cl_init_128_batch', project='tiny_llama')
     
     
     
