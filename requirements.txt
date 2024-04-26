@@ -3,6 +3,7 @@ flash-attn
 accelerate
 tqdm
 wandb
+deepspeed
 datasets==2.15.0
 zstandard
 jsonlines
