@@ -164,7 +164,7 @@ def main():
     
     accelerator = Accelerator(mixed_precision='bf16',gradient_accumulation_steps=128)
     device = accelerator.device
-    model = freeze(model)
+    #model = freeze(model)
 
     model, optimizer, training_dataloader, scheduler = accelerator.prepare(
         model, optimizer, loader, scheduler
