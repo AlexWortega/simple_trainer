@@ -62,7 +62,7 @@ def main():
     #import tensor_parallel as tp
     tokenizer = AutoTokenizer.from_pretrained("AlexWortega/llama3_patched")
     
-    model = AutoModelForCausalLM.from_pretrained("IlyaGusev/saiga_llama3_8b", attn_implementation="flash_attention_2", model_kwargs={"torch_dtype": torch.bfloat16},)
+    model = AutoModelForCausalLM.from_pretrained("IlyaGusev/saiga_llama3_8b", attn_implementation="flash_attention_2", torch_dtype = torch.bfloat16)
 
     model.resize_token_embeddings(len(tokenizer))
     # device_map="auto")
