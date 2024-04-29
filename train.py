@@ -221,21 +221,25 @@ def main():
                             #'eval loss':eval_loss.item()
                         })
     
-                   
-                    
+                
                 if i % 10000 == 0:
-                    try:
-                        state_dict = model.state_dict()
-        
-                        accelerator.save(state_dict, f"LL_adamw_1_tini_ru_freeze/sft_{k}_{i}")
-        
-                        
-                    except:
-                         pass
-                    try:
-                        accelerator.save_state(f"LL_adamw_1_tini_ru_freeze/")
-                    except:
-                        pass
+                    if accelerator.is_main_process:  # Check if this is the main process
+                        try:
+                            state_dict = model.state_dict()
+                            save_path = f"LL_adamw_1_tini_ru_freeze/sft_{k}_{i}.pt"
+                            accelerator.save(state_dict, save_path)
+                        except Exception as e:
+                            print(f"Failed to save model state: {e}")
+                
+                        try:
+                            accelerator.save_state(f"LL_adamw_1_tini_ru_freeze/")
+                        except Exception as e:
+                            print(f"Failed to save accelerator state: {e}")
+                
+                    # Make sure all processes wait until the main process has finished saving
+                    accelerator.wait_for_everyone()
+                    
+                
                         
 if __name__=='__main__':
     main()
