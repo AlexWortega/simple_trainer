@@ -12,6 +12,10 @@ from tqdm import tqdm
 import accelerate
 from accelerate import Accelerator
 from transformers import AutoTokenizer, AutoModelForCausalLM
+rom datetime import timedelta
+from accelerate import Accelerator, InitProcessGroupKwargs
+from torch import tensor
+
 
 def freeze(
     model,
@@ -161,8 +165,9 @@ def main():
     scheduler = get_cosine_schedule_with_warmup(optimizer, num_warmup_steps=num_warmup_steps, num_training_steps=len(loader))
     
    
-    
-    accelerator = Accelerator(mixed_precision='bf16',gradient_accumulation_steps=128)
+    kwargs = [InitProcessGroupKwargs(timeout=timedelta(seconds=100000))]
+    #accelerator = Accelerator(kwargs_handlers=kwargs)
+    accelerator = Accelerator(mixed_precision='bf16',kwargs_handlers=kwargs, gradient_accumulation_steps=128)
     device = accelerator.device
     #model = freeze(model)
 
