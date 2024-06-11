@@ -12,7 +12,7 @@ from tqdm import tqdm
 import accelerate
 from accelerate import Accelerator
 from transformers import AutoTokenizer, AutoModelForCausalLM
-rom datetime import timedelta
+from datetime import timedelta
 from accelerate import Accelerator, InitProcessGroupKwargs
 from torch import tensor
 
